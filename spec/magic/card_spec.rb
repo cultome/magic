@@ -66,6 +66,11 @@ RSpec.describe Magic::Card do
       card.context.owner.mana_pool.add!(colorless: 4, red: 2)
       card.tap!
       expect(card).to be_tapped
+
+      expect{ card.tap! }.to raise_error 'Already tapped'
+
+      card.untap!
+      expect(card).not_to be_tapped
     end
 
     xit 'receives game events' do
