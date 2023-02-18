@@ -1,4 +1,9 @@
 class Magic::ManaCost
+  extend Forwardable
+  include Enumerable
+
+  def_delegator :@cost_by_color, :each, :each
+
   attr_reader :cost_by_color
 
   def self.from(expression)

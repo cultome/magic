@@ -1,0 +1,2 @@
+class Magic::Graveyard
+end
