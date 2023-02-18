@@ -3,6 +3,11 @@ RSpec.describe Magic::Game::Turn do
   let(:p2) { Magic::Player.new }
   let(:turn) { described_class.new(p1, p2) }
 
+  it 'cannot double-start a turn' do
+    turn.start!
+    expect{ turn.start! }.to raise_error 'Turn already started'
+  end
+
   it 'initialize a turn' do
     turn.start!
     expect(turn).to be_started
@@ -32,7 +37,7 @@ RSpec.describe Magic::Game::Turn do
       expect(turn.next?).to eq [{ id: 3, phase: :beginning, step: :draw }]
 
       turn.next!
-      expect(turn.next?).to eq [{ id: 4, phase: :main, step: :first }]
+      expect(turn.next?).to eq [{ id: 4, phase: :main, step: :first_main }]
 
       turn.next!
       expect(turn.next?).to eq [{ id: 5, phase: :combat, step: :declare_attackers }, { id: 10, phase: :ending, step: :end }]
@@ -49,7 +54,7 @@ RSpec.describe Magic::Game::Turn do
       expect(turn.next?).to eq [{ id: 8, phase: :combat, step: :end_of_combat }]
 
       turn.next!
-      expect(turn.next?).to eq [{ id: 9, phase: :main, step: :second }]
+      expect(turn.next?).to eq [{ id: 9, phase: :main, step: :second_main }]
 
       turn.next!
       expect(turn.next?).to eq [{ id: 10, phase: :ending, step: :end }]
@@ -80,7 +85,7 @@ RSpec.describe Magic::Game::Turn do
       expect(turn.next?).to eq [{ id: 3, phase: :beginning, step: :draw }]
 
       turn.next!
-      expect(turn.next?).to eq [{ id: 4, phase: :main, step: :first }]
+      expect(turn.next?).to eq [{ id: 4, phase: :main, step: :first_main }]
 
       turn.next!
       expect(turn.next?).to eq [{ id: 5, phase: :combat, step: :declare_attackers }, { id: 10, phase: :ending, step: :end }]

@@ -2,6 +2,8 @@ module Magic::Game::Event
   class StartBeginningPhase
   end
 
+  class EndBeginningPhase
+  end
   class StartUntapStep
   end
 
@@ -26,10 +28,22 @@ module Magic::Game::Event
   class EndMainPhase
   end
 
-  class StartCombatStep
+  class StartFirstMainStep
   end
 
-  class EndCombatStep
+  class EndFirstMainStep
+  end
+
+  class StartSecondMainStep
+  end
+
+  class EndSecondMainStep
+  end
+
+  class StartCombatPhase
+  end
+
+  class EndCombatPhase
   end
 
   class StartDeclareAttackersStep
@@ -50,6 +64,12 @@ module Magic::Game::Event
   class EndCombatDamageStep
   end
 
+  class StartEndOfCombatStep
+  end
+
+  class EndEndOfCombatStep
+  end
+
   class StartEndingPhase
   end
 
@@ -68,3 +88,5 @@ module Magic::Game::Event
   class EndCleanupStep
   end
 end
+
+require_relative './event/register'

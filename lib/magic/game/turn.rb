@@ -6,23 +6,27 @@ class Magic::Game::Turn
   end
 
   def next!(next_step_id = nil)
-    valid_next_steps = next?
-    if valid_next_steps.size == 1
-      next_step = valid_next_steps.first[:id]
+    before_moment = current_moment
+    move_to_next_moment next_step_id
+    after_moment = current_moment
 
-      # next player
-      @current_player_idx = (current_player_idx + 1) % players.size if next_step < @current_moment_idx
+    if before_moment[:phase] != after_moment[:phase]
+      end_evt_class = Object.const_get "Magic::Game::Event::End#{before_moment[:phase].pascalcase}Phase"
+      start_evt_class = Object.const_get "Magic::Game::Event::Start#{after_moment[:phase].pascalcase}Phase"
 
-      @current_moment_idx = next_step
-    else
-      raise 'You need to choose next step to take' if next_step_id.nil?
-      raise 'Invalid next step' unless valid_next_steps.map { |step| step[:id] }.include?(next_step_id)
-
-      # next player
-      @current_player_idx = (current_player_idx + 1) % players.size if next_step_id < @current_moment_idx
-
-      @current_moment_idx = next_step_id
+      Magic::Game::Event::Register.process_event end_evt_class.new
+      Magic::Game::Event::Register.process_event start_evt_class.new
     end
+
+    if before_moment[:step] != after_moment[:step]
+      end_evt_class = Object.const_get "Magic::Game::Event::End#{before_moment[:step].pascalcase}Step"
+      start_evt_class = Object.const_get "Magic::Game::Event::Start#{after_moment[:step].pascalcase}Step"
+
+      Magic::Game::Event::Register.process_event end_evt_class.new
+      Magic::Game::Event::Register.process_event start_evt_class.new
+    end
+
+    after_moment
   end
 
   def next?
@@ -34,8 +38,17 @@ class Magic::Game::Turn
   end
 
   def start!
-    @current_player_idx = 0
-    @current_moment_idx = 1
+    raise 'Turn already started' if started?
+
+    # revert values to start a new turn, but in fact is the first
+    @current_player_idx = 1
+    @current_moment_idx = 11
+
+    next!
+  end
+
+  def current_moment
+    turn_moments[current_moment_idx]
   end
 
   def current_player
@@ -54,6 +67,25 @@ class Magic::Game::Turn
   end
 
   private
+
+  def move_to_next_moment(next_step_id)
+    valid_next_steps = next?
+    if valid_next_steps.size == 1
+      next_step = valid_next_steps.first[:id]
+      # next player
+      @current_player_idx = (current_player_idx + 1) % players.size if next_step < @current_moment_idx
+
+      @current_moment_idx = next_step
+    else
+      raise 'You need to choose next step to take' if next_step_id.nil?
+      raise 'Invalid next step' unless valid_next_steps.map { |step| step[:id] }.include?(next_step_id)
+
+      # next player
+      @current_player_idx = (current_player_idx + 1) % players.size if next_step_id < @current_moment_idx
+
+      @current_moment_idx = next_step_id
+    end
+  end
 
   def turn_routes
     {
@@ -76,12 +108,12 @@ class Magic::Game::Turn
       1 => { id: 1, phase: :beginning, step: :untap },
       2 => { id: 2, phase: :beginning, step: :upkeep },
       3 => { id: 3, phase: :beginning, step: :draw },
-      4 => { id: 4, phase: :main, step: :first },
+      4 => { id: 4, phase: :main, step: :first_main },
       5 => { id: 5, phase: :combat, step: :declare_attackers },
       6 => { id: 6, phase: :combat, step: :declare_blockers },
       7 => { id: 7, phase: :combat, step: :combat_damage },
       8 => { id: 8, phase: :combat, step: :end_of_combat },
-      9 => { id: 9, phase: :main, step: :second },
+      9 => { id: 9, phase: :main, step: :second_main },
       10 => { id: 10, phase: :ending, step: :end },
       11 => { id: 11, phase: :ending, step: :cleanup },
     }

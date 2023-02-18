@@ -2,6 +2,7 @@
 
 require 'forwardable'
 
+require_relative 'magic/monkeypatches'
 require_relative 'magic/version'
 require_relative 'magic/rarity'
 require_relative 'magic/mana_cost'

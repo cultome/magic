@@ -38,6 +38,11 @@ RSpec.describe Magic::Card do
     ].each { |prop| expect(card).to respond_to prop }
   end
 
+  before :each do
+    card.listen_for Magic::Game::Event::StartBeginningPhase
+    card.listen_for Magic::Game::Event::StartBeginningPhase
+  end
+
   context 'with game context' do
     before :each do
       owner = Magic::Player.new
@@ -46,8 +51,9 @@ RSpec.describe Magic::Card do
       graveyard = Magic::Graveyard.new
       library = Magic::Library.new
       hand = Magic::Hand.new
+      turn = Magic::Game::Turn.new owner, enemy
 
-      card.set_game_context(owner:, enemy:, battlefield:, graveyard:, library:, hand:)
+      card.set_game_context(owner:, enemy:, battlefield:, graveyard:, library:, hand:, turn:)
     end
 
     it 'can access game objects' do
@@ -57,6 +63,7 @@ RSpec.describe Magic::Card do
       expect(card.context.graveyard).not_to be_nil
       expect(card.context.library).not_to be_nil
       expect(card.context.hand).not_to be_nil
+      expect(card.context.turn).not_to be_nil
     end
 
     it 'can be tapped and untapped' do
@@ -73,9 +80,10 @@ RSpec.describe Magic::Card do
       expect(card).not_to be_tapped
     end
 
-    xit 'receives game events' do
-      event = Magic::Game::Event::StartBeginningPhase.new
-      card.apply event
+    it 'receives game events' do
+      expect(card).to receive :apply
+
+      card.context.turn.start!
     end
   end
 end
