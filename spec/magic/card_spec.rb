@@ -74,6 +74,8 @@ RSpec.describe Magic::Card do
     end
 
     xit 'receives game events' do
+      event = Magic::Game::Event::StartBeginningPhase.new
+      card.apply event
     end
   end
 end

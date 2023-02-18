@@ -1,5 +1,5 @@
 class Magic::Card
-  include Magic::GameContext
+  include Magic::Game::Context
   include Magic::Ability::Passive::Tappable
 
   attr_reader :name, :supertype, :subtype, :mana_cost, :abilities, :toughness, :power, :expansion, :rarity, :illustration, :flavor_text,
