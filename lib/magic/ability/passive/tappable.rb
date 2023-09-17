@@ -7,6 +7,8 @@ module Magic::Ability::Passive::Tappable
     raise 'Already tapped' if tapped?
     raise 'Not enough mana' unless context.owner.mana_pool.has?(mana_cost)
 
+    context.owner.mana_pool.consume mana_cost
+
     @tapped = true
   end
 

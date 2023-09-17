@@ -4,6 +4,7 @@ module Magic::Game::Event
 
   class EndBeginningPhase
   end
+
   class StartUntapStep
   end
 
@@ -86,6 +87,23 @@ module Magic::Game::Event
   end
 
   class EndCleanupStep
+  end
+
+  class CardRelatedEvent
+    attr_reader :card
+
+    def initialize(card)
+      @card = card
+    end
+  end
+
+  class HandCardAdded < CardRelatedEvent
+  end
+
+  class HandCardRemoved < CardRelatedEvent
+  end
+
+  class CardPlayed < CardRelatedEvent
   end
 end
 

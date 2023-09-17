@@ -1,3 +1,4 @@
+# Handles the players turns
 class Magic::Game::Turn
   attr_reader :players, :current_player_idx, :current_moment_idx
 
@@ -5,24 +6,30 @@ class Magic::Game::Turn
     @players = [player_1, player_2]
   end
 
-  def next!(next_step_id = nil)
+  def next!(expected_next_step_id = nil)
     before_moment = current_moment
-    move_to_next_moment next_step_id
-    after_moment = current_moment
+    true_next_step_id = next_moment_idx expected_next_step_id
+    after_moment = turn_moments[true_next_step_id]
+
+    if before_moment[:step] != after_moment[:step]
+      end_evt_class = Object.const_get "Magic::Game::Event::End#{before_moment[:step].pascalcase}Step"
+      Magic::Game::Event::Register.process_event end_evt_class.new
+    end
 
     if before_moment[:phase] != after_moment[:phase]
       end_evt_class = Object.const_get "Magic::Game::Event::End#{before_moment[:phase].pascalcase}Phase"
-      start_evt_class = Object.const_get "Magic::Game::Event::Start#{after_moment[:phase].pascalcase}Phase"
-
       Magic::Game::Event::Register.process_event end_evt_class.new
+    end
+
+    move_to_next_moment true_next_step_id # TODO: this should be moved after EndxxxxPhase event is processed
+
+    if before_moment[:phase] != after_moment[:phase]
+      start_evt_class = Object.const_get "Magic::Game::Event::Start#{after_moment[:phase].pascalcase}Phase"
       Magic::Game::Event::Register.process_event start_evt_class.new
     end
 
     if before_moment[:step] != after_moment[:step]
-      end_evt_class = Object.const_get "Magic::Game::Event::End#{before_moment[:step].pascalcase}Step"
       start_evt_class = Object.const_get "Magic::Game::Event::Start#{after_moment[:step].pascalcase}Step"
-
-      Magic::Game::Event::Register.process_event end_evt_class.new
       Magic::Game::Event::Register.process_event start_evt_class.new
     end
 
@@ -69,21 +76,23 @@ class Magic::Game::Turn
   private
 
   def move_to_next_moment(next_step_id)
-    valid_next_steps = next?
-    if valid_next_steps.size == 1
-      next_step = valid_next_steps.first[:id]
-      # next player
-      @current_player_idx = (current_player_idx + 1) % players.size if next_step < @current_moment_idx
+    next_step = next_moment_idx next_step_id
 
-      @current_moment_idx = next_step
+    @current_player_idx = (current_player_idx + 1) % players.size if next_step < @current_moment_idx
+
+    @current_moment_idx = next_step
+  end
+
+  def next_moment_idx(next_step_id)
+    valid_next_steps = next?
+
+    if valid_next_steps.size == 1
+      valid_next_steps.first[:id]
     else
       raise 'You need to choose next step to take' if next_step_id.nil?
       raise 'Invalid next step' unless valid_next_steps.map { |step| step[:id] }.include?(next_step_id)
 
-      # next player
-      @current_player_idx = (current_player_idx + 1) % players.size if next_step_id < @current_moment_idx
-
-      @current_moment_idx = next_step_id
+      next_step_id
     end
   end
 

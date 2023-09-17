@@ -1,6 +1,22 @@
 RSpec.describe Magic::Game::Turn do
-  let(:p1) { Magic::Player.new }
-  let(:p2) { Magic::Player.new }
+  let(:card) do
+    Magic::Card.new(
+      name: 'Ach! Hans, Run!',
+      supertype: 'Enchantment',
+      mana_cost: Magic::ManaCost.from('2C2R2G'),
+      expansion: 'Unhinged',
+      rarity: Magic::Rarity::Rare,
+      illustration: 'https://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=73935&type=card',
+      card_text: "At the beginning of your upkeep, you may say \"Ach Hans, run It's the . . .\" and the name of a creature card. If you do, search your library for a card with that name, put it onto the battlefield, then shuffle. That creature gains haste. Exile it at the beginning of the next end step.",
+      artist: 'Quinton Hoover',
+      collector_number: 116,
+
+    )
+  end
+  let(:lib1) { Magic::Library.new cards: [card] }
+  let(:lib2) { Magic::Library.new cards: [] }
+  let(:p1) { Magic::Player.new library: lib1 }
+  let(:p2) { Magic::Player.new library: lib2 }
   let(:turn) { described_class.new(p1, p2) }
 
   it 'cannot double-start a turn' do
@@ -92,6 +108,20 @@ RSpec.describe Magic::Game::Turn do
 
       turn.next!(10)
       expect(turn.next?).to eq [{ id: 11, phase: :ending, step: :cleanup }]
+    end
+  end
+
+  context 'handles turn interruptions' do
+    it 'when cards in hand/battlefield mention it' do
+      # setup environment
+      p1.mana_pool.produce(colorless: 2, red: 2, green: 2)
+      p1.draw
+      p1.play card
+
+      expect(card).to receive(:apply).once
+
+      turn.start!
+      turn.next!
     end
   end
 end

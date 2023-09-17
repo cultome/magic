@@ -1,22 +1,10 @@
 # Magic
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/magic`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
-
-## Installation
-
-Install the gem and add to the application's Gemfile by executing:
-
-    $ bundle add magic
-
-If bundler is not being used to manage dependencies, install the gem by executing:
-
-    $ gem install magic
+A Magic the Gathering game engine. This is the google-nth time I try to do this, wish me luck.
 
 ## Usage
 
-TODO: Write usage instructions here
+Pending...
 
 ## Development
 

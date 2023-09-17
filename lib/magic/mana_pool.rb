@@ -12,11 +12,21 @@ class Magic::ManaPool
     }
   end
 
+  def empty?
+    mana_by_color.all? { |k, v| v == 0 }
+  end
+
   def has?(mana_cost)
     mana_cost.all? { |color, cost| mana_by_color[color] >= cost }
   end
 
-  def add!(mana_by_color_to_add)
+  def consume(mana_cost)
+    mana_cost.each do |color, count|
+      mana_by_color[color] -= count
+    end
+  end
+
+  def produce(mana_by_color_to_add)
     mana_by_color_to_add.each do |color, count|
       mana_by_color[color] += count
     end

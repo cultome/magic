@@ -20,6 +20,11 @@ RSpec.describe Magic::Card do
     )
   end
 
+  before :each do
+    card.listen_for Magic::Game::Event::StartBeginningPhase
+    card.listen_for Magic::Game::Event::StartBeginningPhase
+  end
+
   it 'build a card' do
     [
       :name,
@@ -38,22 +43,19 @@ RSpec.describe Magic::Card do
     ].each { |prop| expect(card).to respond_to prop }
   end
 
-  before :each do
-    card.listen_for Magic::Game::Event::StartBeginningPhase
-    card.listen_for Magic::Game::Event::StartBeginningPhase
-  end
-
   context 'with game context' do
     before :each do
-      owner = Magic::Player.new
-      enemy = Magic::Player.new
-      battlefield = Magic::Battlefield.new
-      graveyard = Magic::Graveyard.new
-      library = Magic::Library.new
-      hand = Magic::Hand.new
+      lib1 = Magic::Library.new cards: []
+      lib2 = Magic::Library.new cards: []
+      owner = Magic::Player.new library: lib1
+      enemy = Magic::Player.new library: lib2
       turn = Magic::Game::Turn.new owner, enemy
 
-      card.set_game_context(owner:, enemy:, battlefield:, graveyard:, library:, hand:, turn:)
+      card.set_game_context(
+        owner:,
+        enemy:,
+        turn:
+      )
     end
 
     it 'can access game objects' do
@@ -68,13 +70,13 @@ RSpec.describe Magic::Card do
 
     it 'can be tapped and untapped' do
       expect(card).not_to be_tapped
-      expect{ card.tap! }.to raise_error 'Not enough mana'
+      expect { card.tap! }.to raise_error 'Not enough mana'
 
-      card.context.owner.mana_pool.add!(colorless: 4, red: 2)
+      card.context.owner.mana_pool.produce(colorless: 4, red: 2)
       card.tap!
       expect(card).to be_tapped
 
-      expect{ card.tap! }.to raise_error 'Already tapped'
+      expect { card.tap! }.to raise_error 'Already tapped'
 
       card.untap!
       expect(card).not_to be_tapped

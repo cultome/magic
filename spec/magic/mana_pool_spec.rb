@@ -8,7 +8,7 @@ RSpec.describe Magic::ManaPool do
   end
 
   it 'add mana to the pool' do
-    mana_pool.add!(colorless: 1, red: 2, blue: 3)
+    mana_pool.produce(colorless: 1, red: 2, blue: 3)
 
     expect(mana_pool.colorless).to eq 6
     expect(mana_pool.red).to eq 4
